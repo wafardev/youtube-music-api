@@ -7,6 +7,7 @@ A Flask-based API that lets you download YouTube playlists or individual videos 
 - Fetch and return **playlist metadata**, including titles and video links.
 - Automatically converts audio to high-quality MP3 format.
 - Optional cleanup of downloaded files after serving.
+- **Configurable behavior**: Choose between a **single POST** request (with direct download) or a **POST + GET** flow to download the file.
 
 ---
 
@@ -57,7 +58,8 @@ Downloads a YouTube video or playlist as MP3 on the server.
 #### ✅ Request
 ```json
 {
-  "url": "https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID"
+  "url": "https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID",
+  "direct_download": true
 }
 ```
 or
@@ -67,11 +69,23 @@ or
 }
 ```
 
-#### 🔁 Response
+- `direct_download`: Optional flag to specify if the download should be **directly returned** in the response. If `false` or omitted, the response will contain a URL for later downloading.
+
+#### 🔁 Response (direct download)
 ```json
 {
   "status": "success",
   "files": ["Track 1.mp3", "Track 2.mp3"]
+}
+```
+
+#### 🔁 Response (POST + GET flow)
+```json
+{
+  "status": "success",
+  "message": "Download complete",
+  "filename": "Track 1.mp3",
+  "download_url": "/download/Track%201.mp3"
 }
 ```
 
@@ -115,14 +129,21 @@ Fetch metadata (playlist ID, title, and list of videos) from a playlist URL.
 
 ## 🧪 **Testing with `curl`**
 
-Download a playlist:
+### Download a playlist (direct download):
+```bash
+curl -X POST http://127.0.0.1:5000/download \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://www.youtube.com/playlist?list=YOUR_ID", "direct_download": true}' \
+     -OJ
+```
+
+### Download a playlist (POST + GET flow):
 ```bash
 curl -X POST http://127.0.0.1:5000/download \
      -H "Content-Type: application/json" \
      -d '{"url": "https://www.youtube.com/playlist?list=YOUR_ID"}'
 ```
-
-Download a file:
+Then, download the file later:
 ```bash
 curl -O http://127.0.0.1:5000/download/Track%201.mp3
 ```
@@ -131,5 +152,15 @@ curl -O http://127.0.0.1:5000/download/Track%201.mp3
 
 ## 📜 **License**
 MIT — free to use and modify.
+
+---
+
+### 🚨 **How It Works:**
+
+- The `/download` endpoint supports two behaviors:
+  - **Direct download** via a single POST request (`direct_download: true`) — the file is immediately returned to the client.
+  - **POST + GET** — the POST request responds with a metadata object that includes a `download_url`, which can later be used to download the file via a GET request.
+
+You can choose the behavior with the `direct_download` flag in the POST request. If set to `true`, the file will be served directly in the POST response. If omitted or set to `false`, you will get a URL to download the file later.
 
 ---

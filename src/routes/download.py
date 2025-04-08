@@ -1,7 +1,7 @@
-from flask import Blueprint, request, jsonify, send_from_directory
+from flask import Blueprint, request, jsonify, send_file, send_from_directory
 from services.downloader import download_audio_from_playlist
-import urllib.parse
 import os
+import urllib.parse
 
 download_bp = Blueprint('download', __name__)
 DOWNLOADS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'downloads')
@@ -11,9 +11,10 @@ DELETE_AFTER_DOWNLOAD = True
 def download():
     data = request.get_json()
     url = data.get('url')
+    direct_download = data.get('direct_download', False)
 
     if not url:
-        return jsonify({'error': 'Missing playlist URL'}), 400
+        return jsonify({'error': 'Missing URL'}), 400
 
     try:
         print(f"Received URL: {url}")
@@ -21,17 +22,41 @@ def download():
 
         if not filename:
             return jsonify({'status': 'error', 'message': 'Download failed'}), 500
-        
-        return jsonify({
-            'status': 'success',
-            'message': 'Download complete',
-            'filename': filename,
-            'download_url': f'/download/{urllib.parse.quote(filename)}'
-        })
-    
+
+        file_path = os.path.join(DOWNLOADS_DIR, filename)
+
+        if not os.path.isfile(file_path):
+            return jsonify({'status': 'error', 'message': 'File not found'}), 404
+
+        if direct_download:
+            response = send_file(
+                file_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='audio/mpeg'
+            )
+
+            if DELETE_AFTER_DOWNLOAD:
+                @response.call_on_close
+                def cleanup():
+                    try:
+                        os.remove(file_path)
+                        print(f"[INFO] Deleted after download: {file_path}")
+                    except Exception as e:
+                        print(f"[ERROR] Cleanup failed: {e}")
+
+            return response
+        else:
+            return jsonify({
+                'status': 'success',
+                'message': 'Download complete',
+                'filename': filename,
+                'download_url': f'/download/{filename}'
+            })
+
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
+    
 def is_safe_filename(filename):
     basename = os.path.basename(filename)
     return basename == filename
