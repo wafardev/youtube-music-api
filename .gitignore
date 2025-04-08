@@ -1,0 +1,4 @@
+.env
+src/downloads
+src/routes/__pycache__
+src/services/__pycache__
