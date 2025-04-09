@@ -4,9 +4,6 @@ import re
 
 API_KEY = os.getenv('YOUTUBE_API_KEY')
 
-if not API_KEY:
-    raise EnvironmentError("YOUTUBE_API_KEY environment variable not set. Please set it to your YouTube API key.")
-
 def extract_playlist_id(url):
     pattern = r"list=([a-zA-Z0-9_-]+)"
     
