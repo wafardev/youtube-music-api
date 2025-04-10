@@ -2,3 +2,4 @@
 src/downloads
 src/routes/__pycache__
 src/services/__pycache__
+.DS_Store
