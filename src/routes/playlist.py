@@ -1,6 +1,12 @@
 from flask import Blueprint, request, jsonify
-from services.youtube_api import fetch_playlist_videos
 import os
+
+if (os.getenv("FLASK_ENV") == "development"):
+    print("yes")
+    from services.youtube_api import fetch_playlist_videos
+else:
+    print("no")
+    from src.services.youtube_api import fetch_playlist_videos
 
 API_KEY = os.getenv('YOUTUBE_API_KEY')
 

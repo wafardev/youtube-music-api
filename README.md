@@ -8,6 +8,7 @@ A Flask-based API that lets you download YouTube playlists or individual videos 
 - Automatically converts audio to high-quality MP3 format.
 - Optional cleanup of downloaded files after serving.
 - **Configurable behavior**: Choose between a **single POST** request (with direct download) or a **POST + GET** flow to download the file.
+- **Environment-based path imports**: Automatically adjusts import paths based on the environment (development or production).
 
 ---
 
@@ -19,7 +20,7 @@ git clone https://github.com/wafardev/youtube-music-api.git
 cd youtube-music-api
 ```
 
-### 2. Create virtual environment
+### 2. Create a virtual environment
 ```bash
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
@@ -35,17 +36,26 @@ Create a `.env` file in the project root:
 ```
 API_KEY=your_youtube_data_api_key
 FFMPEG_PATH=/absolute/path/to/ffmpeg
+FLASK_ENV=development  # or production
 ```
 
 ---
 
 ## 🚀 **Running the app**
 
+### Running Locally
+To run the application in development mode, execute the following command:
 ```bash
 python3 src/app.py
 ```
 
 The server will be available at `http://127.0.0.1:5000`.
+
+### Running with Gunicorn (for production)
+If you're ready to run the app in production, use Gunicorn:
+```bash
+gunicorn src.app:app
+```
 
 ---
 
@@ -163,4 +173,8 @@ MIT — free to use and modify.
 
 You can choose the behavior with the `direct_download` flag in the POST request. If set to `true`, the file will be served directly in the POST response. If omitted or set to `false`, you will get a URL to download the file later.
 
----
+### 🌍 **Environment-based Imports:**
+
+- The app uses **environment variables** to adjust its behavior between development and production environments.
+- In **development**, the imports are simpler (directly from the `routes` directory).
+- In **production**, it adjusts to import from the `src.routes` directory, ensuring flexibility for different deployment environments.

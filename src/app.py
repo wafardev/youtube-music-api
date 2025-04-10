@@ -1,17 +1,27 @@
 from flask import Flask
-from routes.download import download_bp
-from routes.playlist import playlist_bp
 from apscheduler.schedulers.background import BackgroundScheduler
 import os
 import time
+from dotenv import load_dotenv
+load_dotenv()
+
+if (os.getenv("FLASK_ENV") == "development"):
+    from routes.download import download_bp
+    from routes.playlist import playlist_bp
+else:
+    from src.routes.download import download_bp
+    from src.routes.playlist import playlist_bp
 
 app = Flask(__name__)
 
+# Register the blueprints
 app.register_blueprint(download_bp)
 app.register_blueprint(playlist_bp)
 
+# Folder for downloads
 DOWNLOADS_DIR = os.path.join(os.path.dirname(__file__), 'downloads')
 
+# Background scheduler to clean up old files
 scheduler = BackgroundScheduler()
 
 def cleanup_old_files():
@@ -26,13 +36,14 @@ def cleanup_old_files():
                 print(f"Deleting file: {filename} (Older than 10 minutes)")
                 os.remove(file_path)
 
+# Schedule the cleanup job to run every 10 minutes
 scheduler.add_job(func=cleanup_old_files, trigger="interval", minutes=10)
-
 scheduler.start()
 
 @app.route('/')
 def index():
     return "Music Downloader and Player"
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

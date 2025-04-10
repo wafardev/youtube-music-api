@@ -1,7 +1,11 @@
 from flask import Blueprint, request, jsonify, send_file, send_from_directory
-from services.downloader import download_audio_from_playlist
 import os
 import urllib.parse
+
+if (os.getenv("FLASK_ENV") == "development"):
+    from services.downloader import download_audio_from_playlist
+else:
+    from src.services.downloader import download_audio_from_playlist
 
 download_bp = Blueprint('download', __name__)
 DOWNLOADS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'downloads')
