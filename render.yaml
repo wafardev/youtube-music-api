@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: youtube-music-api
+    env: python
+    buildCommand: ./build.sh
+    startCommand: gunicorn src.app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FFMPEG_PATH
+        value: /opt/render/project/src/bin/ffmpeg
+      - key: API_KEY
+        sync: false

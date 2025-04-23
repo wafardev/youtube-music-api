@@ -1,10 +1,17 @@
 import os
 import yt_dlp as ytdl
+import platform
 
-FFMPEG_PATH = os.getenv('FFMPEG_PATH')
+system = platform.system().lower()
 
-if not FFMPEG_PATH:
-    raise EnvironmentError("FFMPEG_PATH environment variable not set. Please set it to the path of ffmpeg executable.")
+if system == "darwin": # macOS
+    FFMPEG_PATH = os.getenv('FFMPEG_PATH')
+    if not FFMPEG_PATH:
+        raise RuntimeError("FFMPEG_PATH environment variable not set for macOS. Please set it to the path of ffmpeg binary.")
+elif system == "linux": # Linux (for Render)
+    FFMPEG_PATH = "/usr/bin/ffmpeg"
+else:
+    raise RuntimeError("Unsupported OS: ffmpeg binary not found for this platform")
 
 DOWNLOADS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'downloads')
 

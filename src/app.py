@@ -47,6 +47,6 @@ def index():
 
 if __name__ == '__main__':
     if (os.getenv("FLASK_ENV") == "development"):
-        app.run(debug=True, port=5000)
+        app.run(debug=True, port=8000)
     else:
         app.run()
