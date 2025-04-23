@@ -5,6 +5,15 @@ import time
 from dotenv import load_dotenv
 load_dotenv()
 
+import subprocess
+
+try:
+    result = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
+    print("FFmpeg version:\n", result.stdout)
+except Exception as e:
+    print("FFmpeg check failed:", e)
+
+
 if (os.getenv("FLASK_ENV") == "development"):
     from routes.download import download_bp
     from routes.playlist import playlist_bp
