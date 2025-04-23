@@ -1,13 +1,20 @@
 services:
   - type: web
     name: youtube-music-api
-    env: python
-    buildCommand: ./build.sh
+    runtime: python
+    region: oregon
+    buildCommand: |
+      echo "🔧 Updating apt-get and installing ffmpeg..."
+      apt-get update && apt-get install -y ffmpeg
+      echo "✅ ffmpeg installed!"
+
+      echo "📦 Installing Python dependencies..."
+      pip install -r requirements.txt
+      echo "✅ Dependencies installed!"
     startCommand: gunicorn src.app:app
     envVars:
       - key: FLASK_ENV
         value: production
       - key: FFMPEG_PATH
-        value: /opt/render/project/src/bin/ffmpeg
-      - key: API_KEY
-        sync: false
+        value: ffmpeg
+    plan: free
