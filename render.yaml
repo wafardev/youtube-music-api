@@ -2,7 +2,7 @@ services:
   - type: web
     name: youtube-music-api
     runtime: python
-    region: oregon
+    region: frankfurt
     buildCommand: |
       echo "🔧 Updating apt-get and installing ffmpeg..."
       apt-get update && apt-get install -y ffmpeg
